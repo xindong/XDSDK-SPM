@@ -1,8 +1,8 @@
 // swift-tools-version: 5.9
 import PackageDescription
 
-let version = "7.6.3"
-let baseURL = "https://xdsdk-public.oss-cn-beijing.aliyuncs.com/pkg/iOS/SPM/7.6.3"
+let version = "7.7.0"
+let baseURL = "https://xdsdk-public.oss-cn-beijing.aliyuncs.com/pkg/iOS/SPM/7.7.0"
 
 let package = Package(
     name: "XDSDKBinary",
@@ -71,16 +71,16 @@ let package = Package(
 
 private func checksum(_ fileName: String) -> String {
     let checksums: [String: String] = [
-        "XDCommonSDK.xcframework.zip": "0f5bd51c374ab778b84efdc1d0d2f36fb6763553394a55275136854dd5b50636",
-        "XDAccountSDK.xcframework.zip": "a03be0f683486ddfaef52f5f80572380aceb223d521b40718e9207ec014009ea",
-        "XDPaymentSDK.xcframework.zip": "8816b8d35beff0b6ad2448ccf5da7e5daf702f847c69a88107f33072bd31fe5a",
-        "XDDouyinGameWrapperSDK.xcframework.zip": "e7ac76ab5dcd09f34000ea8e3e3bc730aece7350b1451866bb800ee8b1f1beec",
-        "XDCNWrapper.xcframework.zip": "b9f3c38a8f9ffcdf14b326480a73d42aed7b8583ac61b9fabd6d441b1bb913d5",
-        "XDGlobalWrapper.xcframework.zip": "5d050d8d7d2f2a06f57dfac486183c6a795a36a08f2bd5bf12a06274908654c8",
-        "XDGlobalWrapperCrashlytics.xcframework.zip": "693778763123fdaaee251f14ee6275a01db4e12b3ba8bdcb214421ec43fd37bb",
-        "XDTapSDK4WrapperSDK.xcframework.zip": "5140c401489ab3888b5e591fd73a387343d206b00199e31954be3c456ce40342",
-        "UnionOpenPlatformCore.xcframework.zip": "0521169751ce2bca056ca8b0870effbc99f3f11d07cdfedc11cc37da2e020f50",
-        "UnionOpenPlatformDataLink.xcframework.zip": "888350cbb06da8cc7b135bd319f4eb9b646412e8f155643a32bc5cb9263e4d2c",
+        "XDCommonSDK.xcframework.zip": "00707d7728f5957257d12a08fb7aed8e76bda6f0853275b7a276a543d623995c",
+        "XDAccountSDK.xcframework.zip": "98c84a9ebb870902771d6f6452ca9fb8a343392ef719aa8bc77226c928947071",
+        "XDPaymentSDK.xcframework.zip": "151c202bb33d432619197051fc78c567736ba43365c90d200247a5357b3a0082",
+        "XDDouyinGameWrapperSDK.xcframework.zip": "5ce9860e96bfcdd097d8ddb0c971026154b9589d1173d42e0754f1f9b476f8a4",
+        "XDCNWrapper.xcframework.zip": "f3a3409f0b3a8247c1bb0f1376979a6462a418b7f2f917a4675778657bf5f773",
+        "XDGlobalWrapper.xcframework.zip": "3a4c07c63c1e5c2ef24b1944f9bb7755b22cf3bea2d8a0c6b2b68159239e2b76",
+        "XDGlobalWrapperCrashlytics.xcframework.zip": "55ae9f3dc67aeaec12fc806303c9a7cf120c621a1bbd04ea4cbd09b3cf20e8c2",
+        "XDTapSDK4WrapperSDK.xcframework.zip": "4dd8723119ca6592fadf4eb79affef41332068b36bbd3cb3bf38f969d521b644",
+        "UnionOpenPlatformCore.xcframework.zip": "4457ba73f446b80ed33fee563149668daba346224fcc2443f85150ef16c13169",
+        "UnionOpenPlatformDataLink.xcframework.zip": "8f82de4c07d45939ab172205c3ccad20541b4fce4208676684ee3c2095e9de70",
     ]
 
     guard let value = checksums[fileName] else {
