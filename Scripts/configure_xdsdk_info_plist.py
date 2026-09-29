@@ -1,8 +1,10 @@
 #!/usr/bin/env python3
 # Auto-configure App Info.plist (CFBundleURLTypes / LSApplicationQueriesSchemes /
 # Facebook keys) based on XDConfig.json (and UOPSDKConfig.json when the DouYin
-# CPS package is integrated). Mirrors the runtime checks performed by
-# XDGPackageChecker so the App can ship without manual plist edits.
+# CPS package is integrated). Common entries are always considered; CN and
+# Global platform entries are selected by each config's region_type. Mirrors
+# the runtime checks performed by XDGPackageChecker so the App can ship without
+# manual plist edits.
 #
 # Modes:
 #   --mode=patch  (default) write changes to Info.plist
@@ -93,7 +95,8 @@ def find_infoplist_path():
 
 
 def is_cn(config):
-    return (config.get("region_type") or "").lower() != "global"
+    region = config.get("region_type")
+    return not (isinstance(region, str) and region.lower() == "global")
 
 
 def non_empty(value):
@@ -136,95 +139,98 @@ def build_owner_entries(config, namespace=None):
 
     # Field names below mirror the snake_case keys consumed by XDConfigManager
     # / XDWeChatInfo / XDQQInfo / etc. — do NOT change to camelCase.
-    wechat = config.get("wechat") or {}
-    if non_empty(wechat.get("app_id")) and non_empty(wechat.get("universal_link")):
-        entries.append((
-            tag("wechat"),
-            [wechat["app_id"]],
-            ["weixin", "weixinULAPI", "weixinURLParamsAPI"],
-        ))
+    if cn:
+        wechat = config.get("wechat") or {}
+        if non_empty(wechat.get("app_id")) and non_empty(wechat.get("universal_link")):
+            entries.append((
+                tag("wechat"),
+                [wechat["app_id"]],
+                ["weixin", "weixinULAPI", "weixinURLParamsAPI"],
+            ))
 
-    qq = config.get("qq") or {}
-    if non_empty(qq.get("app_id")) and non_empty(qq.get("universal_link")):
-        entries.append((
-            tag("qq"),
-            ["tencent" + qq["app_id"]],
-            ["mqqopensdkapiV2", "mqq", "mqqapi", "tim", "mqqopensdknopasteboard"],
-        ))
+        qq = config.get("qq") or {}
+        if non_empty(qq.get("app_id")) and non_empty(qq.get("universal_link")):
+            entries.append((
+                tag("qq"),
+                ["tencent" + qq["app_id"]],
+                ["mqqopensdkapiV2", "mqq", "mqqapi", "tim", "mqqopensdknopasteboard"],
+            ))
 
-    weibo = config.get("weibo") or {}
-    if non_empty(weibo.get("app_id")) and non_empty(weibo.get("universal_link")):
-        entries.append((
-            tag("weibo"),
-            ["wb" + weibo["app_id"]],
-            ["sinaweibo", "weibosdk", "weibosdk2.5", "weibosdk3.3"],
-        ))
+        weibo = config.get("weibo") or {}
+        if non_empty(weibo.get("app_id")) and non_empty(weibo.get("universal_link")):
+            entries.append((
+                tag("weibo"),
+                ["wb" + weibo["app_id"]],
+                ["sinaweibo", "weibosdk", "weibosdk2.5", "weibosdk3.3"],
+            ))
 
-    xhs = config.get("xhs") or {}
-    # XDXHSInfo reads `app_id_ios` specifically (Android lives in `app_id_android`).
-    if non_empty(xhs.get("app_id_ios")):
-        entries.append((tag("xhs"), ["xhs" + xhs["app_id_ios"]], ["xhsdiscover"]))
+        xhs = config.get("xhs") or {}
+        # XDXHSInfo reads `app_id_ios` specifically (Android lives in `app_id_android`).
+        if non_empty(xhs.get("app_id_ios")):
+            entries.append((tag("xhs"), ["xhs" + xhs["app_id_ios"]], ["xhsdiscover"]))
 
-    douyin = config.get("douyin") or {}
-    if non_empty(douyin.get("app_id")):
-        entries.append((
-            tag("douyin"),
-            [douyin["app_id"]],
-            ["douyinopensdk", "douyinliteopensdk", "douyinsharesdk", "snssdk1128"],
-        ))
+        douyin = config.get("douyin") or {}
+        if non_empty(douyin.get("app_id")):
+            entries.append((
+                tag("douyin"),
+                [douyin["app_id"]],
+                ["douyinopensdk", "douyinliteopensdk", "douyinsharesdk", "snssdk1128"],
+            ))
 
-    kuaishou = config.get("kuaishou") or {}
-    if non_empty(kuaishou.get("app_id")) and non_empty(kuaishou.get("universal_link")):
-        entries.append((
-            tag("kuaishou"),
-            [kuaishou["app_id"]],
-            [
-                "kwai", "kwaiAuth2", "kwaiopenapi", "KwaiBundleToken",
-                "kwai.clip.multi", "KwaiSDKMediaV2", "ksnebula",
-            ],
-        ))
+        kuaishou = config.get("kuaishou") or {}
+        if non_empty(kuaishou.get("app_id")) and non_empty(kuaishou.get("universal_link")):
+            entries.append((
+                tag("kuaishou"),
+                [kuaishou["app_id"]],
+                [
+                    "kwai", "kwaiAuth2", "kwaiopenapi", "KwaiBundleToken",
+                    "kwai.clip.multi", "KwaiSDKMediaV2", "ksnebula",
+                ],
+            ))
+    else:
+        facebook = config.get("facebook") or {}
+        if non_empty(facebook.get("app_id")):
+            entries.append((
+                tag("facebook"),
+                ["fb" + facebook["app_id"]],
+                ["fbapi", "fb-messenger-share-api", "instagram"],
+            ))
 
-    facebook = config.get("facebook") or {}
-    if non_empty(facebook.get("app_id")):
-        entries.append((
-            tag("facebook"),
-            ["fb" + facebook["app_id"]],
-            ["fbapi", "fb-messenger-share-api", "instagram"],
-        ))
+        line = config.get("line") or {}
+        if non_empty(line.get("channel_id")) and bundle_id:
+            entries.append((tag("line"), ["line3rdp." + bundle_id], ["lineauth2"]))
 
-    line = config.get("line") or {}
-    if non_empty(line.get("channel_id")) and bundle_id:
-        entries.append((tag("line"), ["line3rdp." + bundle_id], ["lineauth2"]))
+        twitter = config.get("twitter") or {}
+        if non_empty(twitter.get("consumer_key")) and non_empty(twitter.get("consumer_secret")):
+            entries.append((
+                tag("twitter"),
+                ["tdsg.twitter." + twitter["consumer_key"]],
+                ["twitterauth"],
+            ))
 
-    twitter = config.get("twitter") or {}
-    if non_empty(twitter.get("consumer_key")) and non_empty(twitter.get("consumer_secret")):
-        entries.append((
-            tag("twitter"),
-            ["tdsg.twitter." + twitter["consumer_key"]],
-            ["twitterauth"],
-        ))
+        google = config.get("google") or {}
+        gid = google.get("CLIENT_ID")
+        if non_empty(gid):
+            reversed_id = ".".join(reversed(gid.split(".")))
+            entries.append((tag("google"), [reversed_id], []))
 
-    google = config.get("google") or {}
-    gid = google.get("CLIENT_ID")
-    if non_empty(gid):
-        reversed_id = ".".join(reversed(gid.split(".")))
-        entries.append((tag("google"), [reversed_id], []))
-
-    tiktok = config.get("tiktok") or {}
-    if non_empty(tiktok.get("client_key")):
-        entries.append((
-            tag("tiktok"),
-            [tiktok["client_key"]],
-            ["tiktokopensdk", "tiktoksharesdk", "snssdk1180", "snssdk1233"],
-        ))
+        tiktok = config.get("tiktok") or {}
+        if non_empty(tiktok.get("client_key")):
+            entries.append((
+                tag("tiktok"),
+                [tiktok["client_key"]],
+                ["tiktokopensdk", "tiktoksharesdk", "snssdk1180", "snssdk1233"],
+            ))
 
     return entries
 
 
-def build_uop_entries():
+def build_uop_entries(has_cn_config):
     """DouYin CPS (XDSDKDouYinGame): app_id lives in a separate UOPSDKConfig.json
     bundled with the app, mirroring XDDouYinGameWrapper's runtime check. The
     bundled UOPSDKConfig.json is a singleton, so this is not namespaced."""
+    if not has_cn_config:
+        return []
     uop_path = find_uop_config_path()
     if uop_path is None:
         return []
@@ -252,7 +258,11 @@ def collect_warnings(config, plist):
                 "firebase.enableTrack=true; GoogleService-Info.plist not found under SRCROOT"
             )
     line = config.get("line") or {}
-    if non_empty(line.get("channel_id")) and not env("PRODUCT_BUNDLE_IDENTIFIER"):
+    if (
+        not is_cn(config)
+        and non_empty(line.get("channel_id"))
+        and not env("PRODUCT_BUNDLE_IDENTIFIER")
+    ):
         msgs.append(
             "Line is enabled but PRODUCT_BUNDLE_IDENTIFIER is empty; line URL scheme not configured"
         )
@@ -276,14 +286,37 @@ def merge_url_types(existing, entries):
     return kept + added
 
 
-def build_top_level_keys(config):
-    """Top-level Info.plist string keys owned by the script."""
+def build_top_level_keys(config_sources):
+    """Resolve App-singleton Info.plist keys across every Global config.
+
+    `config_sources` is an ordered list of `(path, config)` pairs. Missing
+    values may be supplied by another Global config, but conflicting non-empty
+    values are rejected because one App Info.plist cannot represent both.
+    """
     out = {}  # dict preserves insertion order
-    facebook = config.get("facebook") or {}
-    if non_empty(facebook.get("app_id")):
-        out["FacebookAppID"] = facebook["app_id"]
-    if non_empty(facebook.get("client_token")):
-        out["FacebookClientToken"] = facebook["client_token"]
+    owners = {}
+    facebook_keys = (
+        ("FacebookAppID", "app_id"),
+        ("FacebookClientToken", "client_token"),
+    )
+    for config_path, config in config_sources:
+        if is_cn(config):
+            continue
+        facebook = config.get("facebook") or {}
+        for plist_key, config_key in facebook_keys:
+            value = facebook.get(config_key)
+            if not non_empty(value):
+                continue
+            if plist_key in out and out[plist_key] != value:
+                raise ValueError(
+                    "conflicting {} across Global configs: {} and {}".format(
+                        plist_key,
+                        owners[plist_key],
+                        config_path,
+                    )
+                )
+            out[plist_key] = value
+            owners[plist_key] = config_path
     return out
 
 
@@ -341,25 +374,32 @@ def merge_queries(existing, sidecar, entries):
 
 
 def dedupe_entries(entries):
-    """Drop entries whose URL scheme list already appeared earlier (likely
-    because two XDConfig variants share the same Facebook / Line / Twitter /
-    platform appId). The first occurrence wins, so the main config keeps its
-    unnamespaced `xdsdk.<platform>` tag and earlier extras win over later
-    ones. Query schemes are de-duplicated separately downstream by
-    `merge_queries`, so we don't need to track them here."""
-    seen_urls = set()
+    """Drop duplicate URL entries while preserving all query schemes.
+
+    Multiple configs can share a URL scheme but still require different query
+    schemes, such as a CN and Global config using the same TapTap client ID.
+    Keep the first URL entry and merge later entries' query schemes into it.
+    """
+    seen_urls = {}
     seen_tags = set()
     out = []
     for tag, urls, queries in entries:
         urls_key = tuple(urls)
         if urls_key in seen_urls:
+            index = seen_urls[urls_key]
+            existing_tag, existing_urls, existing_queries = out[index]
+            merged_queries = list(existing_queries)
+            for query in queries:
+                if query not in merged_queries:
+                    merged_queries.append(query)
+            out[index] = (existing_tag, existing_urls, merged_queries)
             continue
         if tag in seen_tags:
             # Same tag with different urls would silently overwrite later — skip
             # and let the existing entry win. In practice this only happens if
             # caller passes two configs with identical filenames.
             continue
-        seen_urls.add(urls_key)
+        seen_urls[urls_key] = len(out)
         seen_tags.add(tag)
         out.append((tag, urls, queries))
     return out
@@ -413,6 +453,7 @@ def main():
 
     config = json.loads(config_path.read_text(encoding="utf-8"))
     entries = build_owner_entries(config)
+    config_sources = [(config_path, config)]
 
     extra_paths = collect_extra_config_paths(args)
     extras = []  # list of (path, namespace, config) for downstream logging
@@ -428,10 +469,12 @@ def main():
         extra_cfg = json.loads(ep.read_text(encoding="utf-8"))
         entries.extend(build_owner_entries(extra_cfg, namespace=ns))
         extras.append((ep, ns, extra_cfg))
+        config_sources.append((ep, extra_cfg))
 
-    # UOPSDKConfig and Facebook top-level keys are app-singletons; they only
-    # come from the main config / bundled UOPSDKConfig.json.
-    entries.extend(build_uop_entries())
+    # UOPSDKConfig and Facebook top-level keys are app-singletons. UOP is a CN
+    # capability, but mixed-config apps still need it when any config is CN.
+    has_cn_config = is_cn(config) or any(is_cn(extra_cfg) for _, _, extra_cfg in extras)
+    entries.extend(build_uop_entries(has_cn_config))
 
     # Two configs that point at the same Facebook app (or share platform app id
     # because cn-test reuses cn's appId, etc.) would otherwise produce
@@ -447,7 +490,11 @@ def main():
         plist.get(QUERY_SIDECAR_KEY),
         entries,
     )
-    new_top_level = build_top_level_keys(config)
+    try:
+        new_top_level = build_top_level_keys(config_sources)
+    except ValueError as error:
+        print("error: {}".format(error), file=sys.stderr)
+        sys.exit(1)
     top_level_changed, new_top_sidecar = diff_top_level_keys(
         plist, plist.get(TOP_LEVEL_SIDECAR_KEY), new_top_level
     )

@@ -61,15 +61,18 @@ else
 fi
 ```
 
+The script reads `region_type` from `XDConfig.json`: CN copies the common `TapSDK4` plus `CN` resources, while Global copies the common `TapSDK4` plus `Oversea` resources. Resources for the other region are no longer bundled into the `.app`.
+
 Requirements:
 
 - Move this phase to the end of Build Phases (after `Embed Frameworks` / `[CP] Embed Pods Frameworks`)
 - Uncheck `Based on dependency analysis`
 - In `Build Settings`, set `User Script Sandboxing` (`ENABLE_USER_SCRIPT_SANDBOXING`) to `NO`
+- The script looks for `${SRCROOT}/${PRODUCT_NAME}/XDConfig.json` by default. If the config lives elsewhere, set `XDSDK_CONFIG_PATH=/absolute/path/XDConfig.json` in this Run Script
 
 ### 2. Auto-configure `Info.plist`
 
-Reads `XDConfig.json` from the App project and writes `CFBundleURLTypes` / `LSApplicationQueriesSchemes` plus the top-level keys required by Facebook, so you don't have to maintain them by hand.
+Reads `XDConfig.json` from the App project and uses `region_type` to write only the current region's `CFBundleURLTypes` / `LSApplicationQueriesSchemes`, plus the required Facebook top-level keys for Global configs. Common XDSDK / TapTap entries are generated for both regions; CN configs generate only domestic platform entries such as WeChat, QQ, Weibo, XiaoHongShu, DouYin, and KuaiShou, while Global configs generate only Facebook, Line, Twitter, Google, and TikTok entries.
 
 Add a second Run Script Phase named `Configure XDSDK Info.plist`:
 
@@ -88,6 +91,8 @@ Requirements:
 - Uncheck `Based on dependency analysis`
 - Set `User Script Sandboxing` to `NO`
 - The script looks for the config at `${SRCROOT}/${PRODUCT_NAME}/XDConfig.json` by default. If it lives elsewhere, set `XDSDK_CONFIG_PATH=/absolute/path/XDConfig.json` in the Run Script env
+
+If one App explicitly ships multiple CN / Global configs, set the same colon-separated `XDSDK_EXTRA_CONFIG_PATHS` value in both Run Script Phases. The scripts will merge the plist entries and regional resources required by those configs. Facebook top-level keys are resolved across all Global configs; the build fails if different configs provide conflicting `FacebookAppID` or `FacebookClientToken` values instead of silently choosing one.
 
 ### 3. Verify
 

@@ -61,15 +61,18 @@ else
 fi
 ```
 
+脚本会读取 `XDConfig.json` 的 `region_type`：CN 复制通用 `TapSDK4` + `CN` 资源，Global 复制通用 `TapSDK4` + `Oversea` 资源，不再把另一地区资源一起打进 `.app`。
+
 要求：
 
 - 把这个 phase 拖到 Build Phases 的最后（`Embed Frameworks` / `[CP] Embed Pods Frameworks` 之后）
 - 取消勾选 `Based on dependency analysis`
 - `Build Settings` 中把 `User Script Sandboxing`（`ENABLE_USER_SCRIPT_SANDBOXING`）设为 `NO`
+- 默认在 `${SRCROOT}/${PRODUCT_NAME}/XDConfig.json` 查找配置；如不在该路径，需要在这个 Run Script 内设置 `XDSDK_CONFIG_PATH=/绝对/路径/XDConfig.json`
 
 ### 2. 自动配置 `Info.plist`
 
-读取 App 工程下的 `XDConfig.json`，自动写入 `CFBundleURLTypes` / `LSApplicationQueriesSchemes` 以及 Facebook 必需的顶层键，免去手动维护。
+读取 App 工程下的 `XDConfig.json`，根据 `region_type` 按需写入当前区域的 `CFBundleURLTypes` / `LSApplicationQueriesSchemes`，并为 Global 配置写入 Facebook 必需的顶层键，免去手动维护。通用 XDSDK / TapTap 参数始终按配置内容生成；CN 只生成微信、QQ、微博、小红书、抖音、快手等国内平台参数，Global 只生成 Facebook、Line、Twitter、Google、TikTok 等海外平台参数。
 
 再添加一个 Run Script Phase，命名为 `Configure XDSDK Info.plist`，填入：
 
@@ -88,6 +91,8 @@ fi
 - 取消勾选 `Based on dependency analysis`
 - `User Script Sandboxing` 同样设为 `NO`
 - 默认在 `${SRCROOT}/${PRODUCT_NAME}/XDConfig.json` 查找配置；如不在该路径，可在 Run Script 环境里设置 `XDSDK_CONFIG_PATH=/绝对/路径/XDConfig.json`
+
+如果一个 App 显式携带多份 CN / Global 配置，需要在两个 Run Script Phase 中设置相同的 `XDSDK_EXTRA_CONFIG_PATHS`，值为冒号分隔的额外配置路径；两个脚本会分别合并这些配置需要的 plist 参数和区域资源。Facebook 顶层键会从全部 Global 配置中合并；如果不同配置提供了冲突的 `FacebookAppID` 或 `FacebookClientToken`，构建会直接失败，避免静默使用错误配置。
 
 ### 3. 验证
 
