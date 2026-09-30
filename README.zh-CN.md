@@ -26,8 +26,8 @@ https://gitcode.com/XDSDK/XDSDK-SPM.git
 
 Dependency Rule 建议按发布阶段选择：
 
-- 正式版本：选择 `Up to Next Major Version`，填入当前正式版本号，例如 `7.3.1`
-- RC / beta 验证：选择 `Exact Version`，填入完整版本号，例如 `7.3.1-rc.1`
+- 正式版本：选择 `Up to Next Major Version`，填入当前正式版本号，例如 `7.9.0`
+- RC / beta 验证：选择 `Exact Version`，填入完整版本号，例如 `7.9.0-rc.1`
 
 ### 2. 选择 Product
 

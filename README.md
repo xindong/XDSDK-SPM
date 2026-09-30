@@ -26,8 +26,8 @@ https://gitcode.com/XDSDK/XDSDK-SPM.git
 
 Choose the dependency rule based on the release stage:
 
-- Stable releases: use `Up to Next Major Version`, with the current stable version, for example `7.3.1`
-- RC / beta validation: use `Exact Version`, with the full prerelease version, for example `7.3.1-rc.1`
+- Stable releases: use `Up to Next Major Version`, with the current stable version, for example `7.9.0`
+- RC / beta validation: use `Exact Version`, with the full prerelease version, for example `7.9.0-rc.1`
 
 ### 2. Choose a Product
 
