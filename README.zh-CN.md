@@ -4,8 +4,8 @@
 
 ## 环境要求
 
-- `XDSDKCN`、`XDSDKDouYinGame` 最低支持 iOS 11.0+
-- `XDSDKGlobal`、`XDSDKGlobalCrashlytics` 最低支持 iOS 13.0+
+- `XDSDKCN`、`XDSDKDouYinGame` 最低支持 iOS 13.0+
+- `XDSDKGlobal`、`XDSDKGlobalCrashlytics` 最低支持 iOS 15.0+
 - 仅支持真机，不支持 Simulator
 
 ## 添加依赖

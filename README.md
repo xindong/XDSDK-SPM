@@ -4,8 +4,8 @@ XDSDK iOS SDK distributed through Swift Package Manager.
 
 ## Requirements
 
-- iOS 11.0+ for `XDSDKCN` and `XDSDKDouYinGame`
-- iOS 13.0+ for `XDSDKGlobal` and `XDSDKGlobalCrashlytics`
+- iOS 13.0+ for `XDSDKCN` and `XDSDKDouYinGame`
+- iOS 15.0+ for `XDSDKGlobal` and `XDSDKGlobalCrashlytics`
 - Real device only. Simulator is not supported.
 
 ## Add the Dependency
