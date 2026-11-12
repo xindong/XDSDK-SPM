@@ -161,7 +161,7 @@ def build_owner_entries(config, namespace=None):
             entries.append((
                 tag("weibo"),
                 ["wb" + weibo["app_id"]],
-                ["sinaweibo", "weibosdk", "weibosdk2.5", "weibosdk3.3"],
+                ["sinaweibo", "weibosdk", "weibosdk3.3"],
             ))
 
         xhs = config.get("xhs") or {}
@@ -183,8 +183,8 @@ def build_owner_entries(config, namespace=None):
                 tag("kuaishou"),
                 [kuaishou["app_id"]],
                 [
-                    "kwai", "kwaiAuth2", "kwaiopenapi", "KwaiBundleToken",
-                    "kwai.clip.multi", "KwaiSDKMediaV2", "ksnebula",
+                    "kwai", "kwaiAuth2", "kwai.clip.multi",
+                    "KwaiSDKMediaV2", "ksnebula",
                 ],
             ))
     else:
@@ -219,7 +219,7 @@ def build_owner_entries(config, namespace=None):
             entries.append((
                 tag("tiktok"),
                 [tiktok["client_key"]],
-                ["tiktokopensdk", "tiktoksharesdk", "snssdk1180", "snssdk1233"],
+                ["snssdk1180", "snssdk1233"],
             ))
 
     return entries
